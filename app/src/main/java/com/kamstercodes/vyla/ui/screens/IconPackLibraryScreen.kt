@@ -6,25 +6,32 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
+import com.kamstercodes.vyla.data.LauncherRepository
 import com.kamstercodes.vyla.data.local.ThemePreferences
-import com.kamstercodes.vyla.data.remote.model.IconPackDto
-import com.kamstercodes.vyla.ui.theme.VylaTheme
+import com.kamstercodes.vyla.data.model.IconPackInfo
+import com.kamstercodes.vyla.ui.viewmodel.LauncherViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -34,22 +41,17 @@ fun IconPackLibraryScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val themePreferences = remember { ThemePreferences(context) }
+    val repository = remember { LauncherRepository(context) }
+    val viewModel = remember { LauncherViewModel(repository) }
     
-    // Placeholder data
-    val iconPacks = remember {
-        listOf(
-            IconPackDto("1", "Vyla Neon", "https://cdn.pixabay.com/photo/2017/01/31/15/12/alien-2024928_1280.png", "Vyla Team"),
-            IconPackDto("2", "Material Pastel", "https://cdn.pixabay.com/photo/2016/03/31/18/36/android-1294454_1280.png", "Google Design"),
-            IconPackDto("3", "Dark Minimal", "https://cdn.pixbash.com/photo/2018/05/08/21/29/android-3384003_1280.png", "Onyx Icons"), // Fixed typo in URL
-            IconPackDto("4", "Retro Synth", "https://cdn.pixabay.com/photo/2016/11/18/11/17/android-1834164_1280.png", "Retro Wave")
-        )
-    }
+    val iconPacks by viewModel.availableIconPacks.collectAsState()
+    val selectedPackId by themePreferences.selectedIconPackId.collectAsState(initial = null)
 
     var visibleItems by remember { mutableStateOf(setOf<Int>()) }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(iconPacks) {
         iconPacks.forEachIndexed { index, _ ->
-            delay(80)
+            delay(50)
             visibleItems = visibleItems + index
         }
     }
@@ -57,7 +59,7 @@ fun IconPackLibraryScreen(onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Icon Packs", fontWeight = FontWeight.ExtraBold) },
+                title = { Text("ICON PACKS", fontWeight = FontWeight.Black, letterSpacing = 2.sp) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -66,25 +68,47 @@ fun IconPackLibraryScreen(onBack: () -> Unit) {
             )
         }
     ) { innerPadding ->
-        LazyColumn(
-            contentPadding = PaddingValues(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 80.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.padding(innerPadding)
-        ) {
-            itemsIndexed(iconPacks) { index, pack ->
-                AnimatedVisibility(
-                    visible = index in visibleItems,
-                    enter = fadeIn() + slideInHorizontally(initialOffsetX = { it / 4 }, animationSpec = spring(stiffness = Spring.StiffnessLow))
+        Column(modifier = Modifier.padding(innerPadding)) {
+            if (iconPacks.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("No icon packs found", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            } else {
+                LazyColumn(
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    IconPackItem(
-                        pack = pack,
-                        onApply = {
-                            scope.launch {
-                                themePreferences.saveIconPackId(pack.id)
-                                Toast.makeText(context, "VYLA: ${pack.name} Selected!", Toast.LENGTH_SHORT).show()
+                    item {
+                        IconPackItem(
+                            pack = IconPackInfo("none", "System Default", context.packageManager.getApplicationIcon(context.packageName)),
+                            isSelected = selectedPackId == null || selectedPackId == "none",
+                            onApply = {
+                                scope.launch {
+                                    themePreferences.saveIconPackId("none")
+                                    viewModel.loadApps(null)
+                                }
                             }
+                        )
+                    }
+                    
+                    itemsIndexed(iconPacks) { index, pack ->
+                        AnimatedVisibility(
+                            visible = index in visibleItems,
+                            enter = fadeIn() + slideInHorizontally()
+                        ) {
+                            IconPackItem(
+                                pack = pack,
+                                isSelected = selectedPackId == pack.packageName,
+                                onApply = {
+                                    scope.launch {
+                                        themePreferences.saveIconPackId(pack.packageName)
+                                        viewModel.loadApps(pack.packageName)
+                                        Toast.makeText(context, "Applied ${pack.label}", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            )
                         }
-                    )
+                    }
                 }
             }
         }
@@ -92,64 +116,33 @@ fun IconPackLibraryScreen(onBack: () -> Unit) {
 }
 
 @Composable
-fun IconPackItem(pack: IconPackDto, onApply: () -> Unit) {
+fun IconPackItem(pack: IconPackInfo, isSelected: Boolean, onApply: () -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.extraLarge,
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onApply),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f) 
+                            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.1f)
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        border = if (isSelected) androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null
     ) {
         Row(
-            modifier = Modifier
-                .padding(20.dp)
-                .fillMaxWidth(),
+            modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Surface(
-                modifier = Modifier.size(72.dp),
-                shape = MaterialTheme.shapes.large,
-                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-            ) {
-                AsyncImage(
-                    model = pack.iconUrl,
-                    contentDescription = pack.name,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(8.dp)
-                        .clip(MaterialTheme.shapes.medium),
-                    contentScale = ContentScale.Fit
-                )
-            }
-            Spacer(modifier = Modifier.width(20.dp))
+            Image(
+                painter = rememberAsyncImagePainter(pack.icon),
+                contentDescription = null,
+                modifier = Modifier.size(52.dp).clip(CircleShape)
+            )
+            Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = pack.name,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.ExtraBold
-                )
-                Text(
-                    text = "by ${pack.author}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Text(text = pack.label, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                Text(text = pack.packageName, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Button(
-                onClick = onApply,
-                shape = MaterialTheme.shapes.large,
-                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp)
-            ) {
-                Text("Select", fontWeight = FontWeight.Bold)
+            if (isSelected) {
+                Icon(Icons.Default.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
             }
         }
-    }
-}
-
-@Preview(showBackground = true, device = "spec:width=411dp,height=891dp")
-@Composable
-fun IconPackLibraryScreenPreview() {
-    VylaTheme {
-        IconPackLibraryScreen(onBack = {})
     }
 }

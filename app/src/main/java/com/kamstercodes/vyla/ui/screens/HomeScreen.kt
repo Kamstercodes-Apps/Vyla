@@ -1,5 +1,6 @@
 package com.kamstercodes.vyla.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -76,8 +77,11 @@ fun HomeScreen(
     val accentColor = remember(accentColorHex) { Color(android.graphics.Color.parseColor(accentColorHex)) }
     val pagerState = rememberPagerState(pageCount = { 2 })
 
+    LaunchedEffect(iconPackId) {
+        viewModel.loadApps(if (iconPackId == "none" || iconPackId == "1" || iconPackId == "2") null else iconPackId)
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
-        // Shared Wallpaper
         if (wallpaperUrl != null) {
             AsyncImage(
                 model = wallpaperUrl,
@@ -119,7 +123,6 @@ fun HomeScreen(
             }
         }
         
-        // Dynamic Page Indicator
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -179,7 +182,6 @@ fun MainHomePage(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Large Widget Area
         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
             val widgetModifier = Modifier.fillMaxWidth(0.92f).graphicsLayer { 
                 shadowElevation = 8f
@@ -195,7 +197,6 @@ fun MainHomePage(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // Favorite Apps Layout
         Box(modifier = Modifier.padding(bottom = 60.dp)) {
             if (useFlowerLayout && apps.isNotEmpty()) {
                 FlowerLayout(apps, onAppClick, transparency, accentColor, iconSize, iconPackId)
@@ -231,12 +232,10 @@ fun FlowerLayout(
         modifier = Modifier.size(300.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Central App
         if (apps.isNotEmpty()) {
             AppIconSimple(apps[0], onAppClick, transparency, accentColor, iconSize * 1.3f, iconPackId)
         }
         
-        // Surrounding Apps in a circle
         val surroundingApps = apps.drop(1).take(6)
         surroundingApps.forEachIndexed { index, app ->
             val angle = (index * (360f / surroundingApps.size) - 90f) * (PI / 180f)
@@ -267,6 +266,7 @@ fun AppDrawerPage(
     iconPackId: String?
 ) {
     var selectedCategory by remember { mutableStateOf(AppCategory.COMMUNICATION) }
+    var searchQuery by remember { mutableStateOf("") }
 
     Row(
         modifier = Modifier
@@ -274,7 +274,6 @@ fun AppDrawerPage(
             .statusBarsPadding()
             .navigationBarsPadding()
     ) {
-        // Sidebar for Categories
         Column(
             modifier = Modifier
                 .width(84.dp)
@@ -314,37 +313,36 @@ fun AppDrawerPage(
             }
         }
 
-        // App Grid
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 20.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = selectedCategory.title,
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = Color.White,
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 1.sp
-                )
-                
-                Surface(
-                    shape = CircleShape,
-                    color = Color.White.copy(alpha = 0.1f),
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(Icons.Default.Search, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
-                    }
-                }
-            }
+            TextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp, bottom = 16.dp)
+                    .clip(RoundedCornerShape(12.dp)),
+                placeholder = { Text("Search apps...", color = Color.White.copy(alpha = 0.5f)) },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.White.copy(alpha = 0.5f)) },
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.White.copy(alpha = 0.1f),
+                    unfocusedContainerColor = Color.White.copy(alpha = 0.1f),
+                    disabledContainerColor = Color.White.copy(alpha = 0.1f),
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White
+                ),
+                singleLine = true
+            )
 
             val appsInCategory = categorizedApps[selectedCategory] ?: emptyList()
+            val filteredApps = if (searchQuery.isEmpty()) appsInCategory else {
+                appsInCategory.filter { it.label.contains(searchQuery, ignoreCase = true) }
+            }
 
             LazyVerticalGrid(
                 columns = GridCells.Fixed(gridColumns),
@@ -353,7 +351,7 @@ fun AppDrawerPage(
                 verticalArrangement = Arrangement.spacedBy(24.dp),
                 contentPadding = PaddingValues(bottom = 120.dp)
             ) {
-                items(appsInCategory) { app ->
+                items(filteredApps) { app ->
                     AppItemDrawer(app, onAppClick, transparency, iconSize, labelSize, showLabels, accentColor, iconPackId)
                 }
             }
@@ -386,9 +384,7 @@ fun AppIconSimple(
                 },
             contentAlignment = Alignment.Center
         ) {
-            // Icon Pack Logic
             val isNeon = iconPackId == "1"
-            val isPastel = iconPackId == "2"
             
             Image(
                 painter = rememberAsyncImagePainter(app.icon),
@@ -399,9 +395,6 @@ fun AppIconSimple(
             
             if (isNeon) {
                 Box(modifier = Modifier.fillMaxSize().blur(12.dp).alpha(0.2f).background(accentColor))
-            }
-            if (isPastel) {
-                Box(modifier = Modifier.fillMaxSize().background(Color.White.copy(alpha = 0.15f)))
             }
         }
     }
