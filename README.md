@@ -46,7 +46,7 @@ VYLA is a modern, high-performance Android launcher built with **Jetpack Compose
 - **Asynchrony**: [Kotlin Coroutines](https://kotlinlang.org/docs/coroutines-overview.html) & [Flow](https://kotlinlang.org/docs/flow.html)
 
 ## 📸 Screenshots
-| Home (Grid) | Home (Flower) | Settings |
+| Home (Grid) | Home (Flower) | Settings ||
 | :---: | :---: | :---: | :---: |
 | <img src="Screenshot-Grid.png" height="250"> | <img src="Screenshot-Flower.png" height="250"> | <img src="Screenshot-Settings.png" height="250"> |
 
