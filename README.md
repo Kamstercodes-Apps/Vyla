@@ -51,7 +51,7 @@ VYLA is a modern, high-performance Android launcher built with **Jetpack Compose
 | <img src="Screenshot-Grid.png" height="250"> | <img src="Screenshot-Flower.png" height="250"> | <img src="Screenshot-Settings.png" height="250"> |
 
 ## 📜 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙌 Contributing
 Contributions are welcome! Please feel free to submit a Pull Request.
