@@ -8,7 +8,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,9 +32,15 @@ fun ClockWidget(modifier: Modifier = Modifier) {
     val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
     val dateFormat = SimpleDateFormat("EEE, MMM d", Locale.getDefault())
 
+    val textShadow = Shadow(
+        color = Color.Black.copy(alpha = 0.3f),
+        offset = Offset(0f, 2f),
+        blurRadius = 4f
+    )
+
     GlassBox(
         modifier = modifier,
-        transparency = 0.2f
+        transparency = 0.25f
     ) {
         Column(
             modifier = Modifier.padding(24.dp),
@@ -39,17 +48,23 @@ fun ClockWidget(modifier: Modifier = Modifier) {
         ) {
             Text(
                 text = timeFormat.format(time),
-                style = MaterialTheme.typography.displayLarge,
-                fontWeight = FontWeight.W200, // Thinner, more elegant iOS look
+                style = TextStyle(
+                    fontSize = 72.sp,
+                    fontWeight = FontWeight.W200,
+                    shadow = textShadow
+                ),
                 color = Color.White,
                 letterSpacing = (-2).sp
             )
             Text(
                 text = dateFormat.format(time).uppercase(),
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold,
-                color = Color.White.copy(alpha = 0.7f),
-                letterSpacing = 2.sp
+                style = TextStyle(
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    shadow = textShadow,
+                    letterSpacing = 2.sp
+                ),
+                color = Color.White.copy(alpha = 0.85f)
             )
         }
     }
@@ -57,9 +72,15 @@ fun ClockWidget(modifier: Modifier = Modifier) {
 
 @Composable
 fun WeatherWidget(modifier: Modifier = Modifier) {
+    val textShadow = Shadow(
+        color = Color.Black.copy(alpha = 0.3f),
+        offset = Offset(0f, 2f),
+        blurRadius = 4f
+    )
+
     GlassBox(
         modifier = modifier,
-        transparency = 0.2f
+        transparency = 0.25f
     ) {
         Row(
             modifier = Modifier.padding(20.dp),
@@ -68,23 +89,29 @@ fun WeatherWidget(modifier: Modifier = Modifier) {
             Icon(
                 imageVector = Icons.Default.Cloud,
                 contentDescription = null,
-                modifier = Modifier.size(48.dp),
+                modifier = Modifier.size(52.dp),
                 tint = Color.White
             )
             Spacer(modifier = Modifier.width(20.dp))
             Column {
                 Text(
                     text = "24°",
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Light,
+                    style = TextStyle(
+                        fontSize = 36.sp,
+                        fontWeight = FontWeight.Light,
+                        shadow = textShadow
+                    ),
                     color = Color.White
                 )
                 Text(
                     text = "Partly Cloudy".uppercase(),
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White.copy(alpha = 0.6f),
-                    letterSpacing = 1.sp
+                    style = TextStyle(
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        shadow = textShadow,
+                        letterSpacing = 1.2.sp
+                    ),
+                    color = Color.White.copy(alpha = 0.8f)
                 )
             }
         }
@@ -93,9 +120,15 @@ fun WeatherWidget(modifier: Modifier = Modifier) {
 
 @Composable
 fun BatteryWidget(modifier: Modifier = Modifier) {
+    val textShadow = Shadow(
+        color = Color.Black.copy(alpha = 0.3f),
+        offset = Offset(0f, 2f),
+        blurRadius = 4f
+    )
+
     GlassBox(
         modifier = modifier,
-        transparency = 0.2f
+        transparency = 0.25f
     ) {
         Row(
             modifier = Modifier.padding(20.dp),
@@ -104,23 +137,26 @@ fun BatteryWidget(modifier: Modifier = Modifier) {
             Icon(
                 imageVector = Icons.Default.BatteryFull,
                 contentDescription = null,
-                modifier = Modifier.size(36.dp),
+                modifier = Modifier.size(38.dp),
                 tint = Color(0xFF34C759) // iOS Green
             )
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(18.dp))
             Column {
                 Text(
                     text = "85%",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
+                    style = TextStyle(
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        shadow = textShadow
+                    ),
                     color = Color.White
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(6.dp))
                 LinearProgressIndicator(
                     progress = { 0.85f },
-                    modifier = Modifier.width(80.dp).height(6.dp),
+                    modifier = Modifier.width(90.dp).height(8.dp),
                     color = Color(0xFF34C759),
-                    trackColor = Color.White.copy(alpha = 0.2f),
+                    trackColor = Color.White.copy(alpha = 0.25f),
                     strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
                 )
             }

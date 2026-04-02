@@ -1,10 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+
+    <!-- Stylized 'V' Logo with Depth -->
     <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M34,36 L54,72 L74,36 L64,36 L54,54 L44,36 Z" />
+        android:pathData="M30,35 L54,75 L78,35 L68,35 L54,58 L40,35 Z"
+        android:fillAlpha="0.3"
+        android:fillColor="#00FFCC" />
+
+    <path
+        android:pathData="M30,32 L54,72 L78,32 L66,32 L54,52 L42,32 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="54"
+                android:startY="32"
+                android:endX="54"
+                android:endY="72"
+                android:type="linear">
+                <item android:offset="0" android:color="#FFFFFFFF"/>
+                <item android:offset="1" android:color="#FF00FFCC"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Reflective highlight for a 'glassy' feel -->
+    <path
+        android:pathData="M42,32 L54,52 L50,52 L42,32 Z"
+        android:fillColor="#4DFFFFFF" />
+
 </vector>

@@ -28,12 +28,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -135,7 +138,7 @@ fun HomeScreen(
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 32.dp)
                 .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.12f))
+                .background(Color.White.copy(alpha = 0.2f))
                 .padding(horizontal = 14.dp, vertical = 7.dp)
         ) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -145,7 +148,7 @@ fun HomeScreen(
                     Box(
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(if (active) Color.White else Color.White.copy(alpha = 0.35f))
+                            .background(if (active) Color.White else Color.White.copy(alpha = 0.45f))
                             .size(width = indicatorWidth.dp, height = 7.dp)
                     )
                 }
@@ -176,12 +179,12 @@ fun MainHomePage(
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
             GlassBox(
                 modifier = Modifier
-                    .size(44.dp)
+                    .size(48.dp)
                     .clickable { onNavigateToSettings() },
                 shape = CircleShape,
-                transparency = 0.15f
+                transparency = 0.2f
             ) {
-                Icon(Icons.Default.Settings, contentDescription = "Settings", tint = Color.White, modifier = Modifier.size(20.dp))
+                Icon(Icons.Default.Settings, contentDescription = "Settings", tint = Color.White, modifier = Modifier.size(24.dp))
             }
         }
 
@@ -203,9 +206,9 @@ fun MainHomePage(
             } else {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(3),
-                    modifier = Modifier.width(310.dp),
-                    horizontalArrangement = Arrangement.spacedBy(26.dp),
-                    verticalArrangement = Arrangement.spacedBy(26.dp),
+                    modifier = Modifier.width(320.dp),
+                    horizontalArrangement = Arrangement.spacedBy(28.dp),
+                    verticalArrangement = Arrangement.spacedBy(28.dp),
                     contentPadding = PaddingValues(16.dp)
                 ) {
                     items(apps) { app ->
@@ -231,13 +234,13 @@ fun FlowerLayout(
         contentAlignment = Alignment.Center
     ) {
         if (apps.isNotEmpty()) {
-            AppIconSimple(apps[0], onAppClick, transparency, accentColor, iconSize * 1.35f, iconPackId)
+            AppIconSimple(apps[0], onAppClick, transparency, accentColor, iconSize * 1.4f, iconPackId)
         }
         
         val surroundingApps = apps.drop(1).take(6)
         surroundingApps.forEachIndexed { index, app ->
             val angle = (index * (360f / surroundingApps.size) - 90f) * (PI / 180f)
-            val radius = 105.dp
+            val radius = 110.dp
             
             Box(
                 modifier = Modifier.offset(
@@ -281,7 +284,7 @@ fun AppDrawerPage(
                 .fillMaxHeight()
                 .padding(vertical = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // "All Apps" / "Recents" Icon
             CategoryIconButton(
@@ -291,7 +294,7 @@ fun AppDrawerPage(
                 accentColor = Color.White
             )
 
-            Divider(modifier = Modifier.width(40.dp).padding(vertical = 8.dp), color = Color.White.copy(alpha = 0.1f))
+            Divider(modifier = Modifier.width(40.dp).padding(vertical = 8.dp), color = Color.White.copy(alpha = 0.15f))
 
             AppCategory.values().forEach { category ->
                 CategoryIconButton(
@@ -314,15 +317,15 @@ fun AppDrawerPage(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp, bottom = 16.dp),
-                shape = RoundedCornerShape(14.dp),
-                transparency = 0.12f
+                shape = RoundedCornerShape(16.dp),
+                transparency = 0.15f
             ) {
                 TextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Search Apps", color = Color.White.copy(alpha = 0.35f), style = MaterialTheme.typography.bodyMedium) },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.White.copy(alpha = 0.4f), modifier = Modifier.size(20.dp)) },
+                    placeholder = { Text("Search Apps", color = Color.White.copy(alpha = 0.5f), style = MaterialTheme.typography.bodyMedium) },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.White.copy(alpha = 0.6f), modifier = Modifier.size(22.dp)) },
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
@@ -340,10 +343,16 @@ fun AppDrawerPage(
             // Category Header / Content Title
             Text(
                 text = (selectedCategory?.title ?: if(searchQuery.isEmpty()) "Recent & Recommended" else "Search Results").uppercase(),
-                style = MaterialTheme.typography.labelSmall,
-                color = Color.White.copy(alpha = 0.45f),
-                fontWeight = FontWeight.ExtraBold,
-                letterSpacing = 1.5.sp,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    shadow = Shadow(
+                        color = Color.Black.copy(alpha = 0.4f),
+                        offset = Offset(0f, 2f),
+                        blurRadius = 4f
+                    )
+                ),
+                color = Color.White.copy(alpha = 0.7f),
+                fontWeight = FontWeight.Black,
+                letterSpacing = 2.sp,
                 modifier = Modifier.padding(bottom = 16.dp, start = 4.dp)
             )
 
@@ -359,8 +368,8 @@ fun AppDrawerPage(
             LazyVerticalGrid(
                 columns = GridCells.Fixed(gridColumns),
                 modifier = Modifier.fillMaxSize(),
-                horizontalArrangement = Arrangement.spacedBy(14.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(28.dp),
                 contentPadding = PaddingValues(bottom = 120.dp, top = 4.dp)
             ) {
                 items(displayApps) { app ->
@@ -382,25 +391,25 @@ fun CategoryIconButton(
     
     Box(
         modifier = Modifier
-            .size(52.dp)
+            .size(54.dp)
             .graphicsLayer { scaleX = scale; scaleY = scale }
-            .clip(RoundedCornerShape(16.dp))
-            .background(if (isSelected) Color.White.copy(alpha = 0.15f) else Color.Transparent)
+            .clip(RoundedCornerShape(18.dp))
+            .background(if (isSelected) Color.White.copy(alpha = 0.2f) else Color.Transparent)
             .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = if (isSelected) accentColor else Color.White.copy(alpha = 0.4f),
-            modifier = Modifier.size(24.dp)
+            tint = if (isSelected) accentColor else Color.White.copy(alpha = 0.5f),
+            modifier = Modifier.size(26.dp)
         )
         if (isSelected) {
             Box(
                 modifier = Modifier
                     .align(Alignment.CenterStart)
                     .width(4.dp)
-                    .height(20.dp)
+                    .height(24.dp)
                     .clip(RoundedCornerShape(2.dp))
                     .background(accentColor)
             )
@@ -425,17 +434,17 @@ fun AppIconSimple(
             modifier = Modifier.size(size),
             shape = CircleShape,
             transparency = transparency,
-            borderWidth = 1.2.dp
+            borderWidth = 1.5.dp
         ) {
             val isNeon = iconPackId == "1"
             Image(
                 painter = rememberAsyncImagePainter(app.icon),
                 contentDescription = null,
-                modifier = Modifier.size(size * 0.68f),
+                modifier = Modifier.size(size * 0.72f),
                 colorFilter = if (isNeon) ColorFilter.tint(accentColor.copy(alpha = 0.95f)) else null
             )
             if (isNeon) {
-                Box(modifier = Modifier.fillMaxSize().blur(18.dp).alpha(0.25f).background(accentColor))
+                Box(modifier = Modifier.fillMaxSize().blur(20.dp).alpha(0.3f).background(accentColor))
             }
         }
     }
@@ -460,32 +469,38 @@ fun AppItemDrawer(
     ) {
         GlassBox(
             modifier = Modifier.size(iconSize),
-            shape = RoundedCornerShape(iconSize / 3.8f),
-            transparency = transparency / 1.6f,
-            borderWidth = 0.6.dp
+            shape = RoundedCornerShape(iconSize / 4f),
+            transparency = transparency,
+            borderWidth = 1.dp
         ) {
             val isNeon = iconPackId == "1"
             Image(
                 painter = rememberAsyncImagePainter(app.icon),
                 contentDescription = null, 
-                modifier = Modifier.size(iconSize * 0.62f),
+                modifier = Modifier.size(iconSize * 0.7f),
                 colorFilter = if (isNeon) ColorFilter.tint(accentColor) else null
             )
         }
         
         if (showLabels) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = app.label,
-                style = MaterialTheme.typography.labelSmall,
-                color = Color.White.copy(alpha = 0.9f),
+                style = TextStyle(
+                    fontSize = labelSize.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    shadow = Shadow(
+                        color = Color.Black.copy(alpha = 0.7f),
+                        offset = Offset(0f, 2f),
+                        blurRadius = 4f
+                    )
+                ),
+                color = Color.White,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center,
-                fontSize = labelSize.sp,
-                fontWeight = FontWeight.Medium,
                 lineHeight = (labelSize + 2).sp,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 2.dp)
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp)
             )
         }
     }

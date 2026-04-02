@@ -14,6 +14,7 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -30,8 +31,9 @@ fun GlassBox(
 ) {
     val isDark = isSystemInDarkTheme()
     
-    val baseColor = if (isDark) Color.Black else Color.White
-    val borderColor = if (isDark) Color.White.copy(alpha = 0.15f) else Color.White.copy(alpha = 0.4f)
+    // Improved base colors for better contrast
+    val baseColor = if (isDark) Color.Black.copy(alpha = 0.8f) else Color.White.copy(alpha = 0.7f)
+    val borderColor = if (isDark) Color.White.copy(alpha = 0.25f) else Color.Black.copy(alpha = 0.15f)
     
     Box(
         modifier = modifier
@@ -39,21 +41,18 @@ fun GlassBox(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        baseColor.copy(alpha = transparency),
-                        baseColor.copy(alpha = transparency * 0.6f)
+                        baseColor.copy(alpha = transparency * 1.2f),
+                        baseColor.copy(alpha = transparency * 0.8f)
                     )
                 )
             )
             .border(
                 width = borderWidth,
                 brush = Brush.linearGradient(
-                    colors = listOf(borderColor, Color.Transparent, borderColor.copy(alpha = 0.1f))
+                    colors = listOf(borderColor, Color.Transparent, borderColor.copy(alpha = 0.2f))
                 ),
                 shape = shape
-            )
-            .drawWithContent {
-                drawContent()
-            },
+            ),
         contentAlignment = contentAlignment,
         content = content
     )
