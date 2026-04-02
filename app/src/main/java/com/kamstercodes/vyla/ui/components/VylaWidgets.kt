@@ -1,6 +1,5 @@
 package com.kamstercodes.vyla.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BatteryFull
@@ -30,27 +29,27 @@ fun ClockWidget(modifier: Modifier = Modifier) {
     val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
     val dateFormat = SimpleDateFormat("EEE, MMM d", Locale.getDefault())
 
-    Card(
+    GlassBox(
         modifier = modifier,
-        shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f)
-        )
+        transparency = 0.2f
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = timeFormat.format(time),
-                style = MaterialTheme.typography.displayMedium,
-                fontWeight = FontWeight.Black,
-                color = MaterialTheme.colorScheme.onSecondaryContainer
+                style = MaterialTheme.typography.displayLarge,
+                fontWeight = FontWeight.W200, // Thinner, more elegant iOS look
+                color = Color.White,
+                letterSpacing = (-2).sp
             )
             Text(
-                text = dateFormat.format(time),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+                text = dateFormat.format(time).uppercase(),
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = Color.White.copy(alpha = 0.7f),
+                letterSpacing = 2.sp
             )
         }
     }
@@ -58,35 +57,34 @@ fun ClockWidget(modifier: Modifier = Modifier) {
 
 @Composable
 fun WeatherWidget(modifier: Modifier = Modifier) {
-    Card(
+    GlassBox(
         modifier = modifier,
-        shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.8f)
-        )
+        transparency = 0.2f
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = Icons.Default.Cloud,
                 contentDescription = null,
-                modifier = Modifier.size(40.dp),
-                tint = MaterialTheme.colorScheme.onTertiaryContainer
+                modifier = Modifier.size(48.dp),
+                tint = Color.White
             )
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(20.dp))
             Column {
                 Text(
-                    text = "24°C",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                    text = "24°",
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Light,
+                    color = Color.White
                 )
                 Text(
-                    text = "Partly Cloudy",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f)
+                    text = "Partly Cloudy".uppercase(),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White.copy(alpha = 0.6f),
+                    letterSpacing = 1.sp
                 )
             }
         }
@@ -95,36 +93,35 @@ fun WeatherWidget(modifier: Modifier = Modifier) {
 
 @Composable
 fun BatteryWidget(modifier: Modifier = Modifier) {
-    Card(
+    GlassBox(
         modifier = modifier,
-        shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f)
-        )
+        transparency = 0.2f
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = Icons.Default.BatteryFull,
                 contentDescription = null,
-                modifier = Modifier.size(32.dp),
-                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                modifier = Modifier.size(36.dp),
+                tint = Color(0xFF34C759) // iOS Green
             )
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(16.dp))
             Column {
                 Text(
                     text = "85%",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    color = Color.White
                 )
+                Spacer(modifier = Modifier.height(4.dp))
                 LinearProgressIndicator(
                     progress = { 0.85f },
-                    modifier = Modifier.width(60.dp),
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                    modifier = Modifier.width(80.dp).height(6.dp),
+                    color = Color(0xFF34C759),
+                    trackColor = Color.White.copy(alpha = 0.2f),
+                    strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
                 )
             }
         }

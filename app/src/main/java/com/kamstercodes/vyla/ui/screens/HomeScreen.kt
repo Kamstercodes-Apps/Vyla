@@ -2,6 +2,10 @@ package com.kamstercodes.vyla.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -43,6 +47,7 @@ import com.kamstercodes.vyla.data.local.ThemePreferences
 import com.kamstercodes.vyla.data.model.AppInfo
 import com.kamstercodes.vyla.ui.components.BatteryWidget
 import com.kamstercodes.vyla.ui.components.ClockWidget
+import com.kamstercodes.vyla.ui.components.GlassBox
 import com.kamstercodes.vyla.ui.components.WeatherWidget
 import com.kamstercodes.vyla.ui.viewmodel.AppCategory
 import com.kamstercodes.vyla.ui.viewmodel.LauncherViewModel
@@ -90,7 +95,7 @@ fun HomeScreen(
                 contentScale = ContentScale.Crop
             )
         } else {
-            Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
+            Box(modifier = Modifier.fillMaxSize().background(Color.Black))
         }
 
         HorizontalPager(
@@ -111,6 +116,7 @@ fun HomeScreen(
                 )
                 1 -> AppDrawerPage(
                     categorizedApps = categorizedApps,
+                    allApps = allApps,
                     onAppClick = { viewModel.launchApp(it) },
                     transparency = transparency,
                     accentColor = accentColor,
@@ -123,24 +129,24 @@ fun HomeScreen(
             }
         }
         
+        // Refined Page Indicator (iOS 16/17 style)
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 24.dp)
+                .padding(bottom = 32.dp)
                 .clip(CircleShape)
-                .background(Color.Black.copy(alpha = 0.3f))
-                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .background(Color.White.copy(alpha = 0.12f))
+                .padding(horizontal = 14.dp, vertical = 7.dp)
         ) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                 repeat(2) { iteration ->
                     val active = pagerState.currentPage == iteration
-                    val color = if (active) accentColor else Color.White.copy(alpha = 0.4f)
-                    val width by animateFloatAsState(targetValue = if (active) 24f else 8f)
+                    val indicatorWidth by animateFloatAsState(targetValue = if (active) 24f else 8f)
                     Box(
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(color)
-                            .size(width = width.dp, height = 8.dp)
+                            .background(if (active) Color.White else Color.White.copy(alpha = 0.35f))
+                            .size(width = indicatorWidth.dp, height = 7.dp)
                     )
                 }
             }
@@ -168,44 +174,38 @@ fun MainHomePage(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-            Surface(
-                onClick = onNavigateToSettings,
+            GlassBox(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clickable { onNavigateToSettings() },
                 shape = CircleShape,
-                color = Color.Black.copy(alpha = transparency),
-                modifier = Modifier.size(48.dp)
+                transparency = 0.15f
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(Icons.Default.Settings, contentDescription = "Settings", tint = Color.White)
-                }
+                Icon(Icons.Default.Settings, contentDescription = "Settings", tint = Color.White, modifier = Modifier.size(20.dp))
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
-            val widgetModifier = Modifier.fillMaxWidth(0.92f).graphicsLayer { 
-                shadowElevation = 8f
-                shape = RoundedCornerShape(24.dp)
-                clip = true
-            }
             when (widgetType) {
-                "weather" -> WeatherWidget(modifier = widgetModifier)
-                "battery" -> BatteryWidget(modifier = widgetModifier)
-                else -> ClockWidget(modifier = widgetModifier)
+                "weather" -> WeatherWidget(modifier = Modifier.fillMaxWidth(0.92f))
+                "battery" -> BatteryWidget(modifier = Modifier.fillMaxWidth(0.92f))
+                else -> ClockWidget(modifier = Modifier.fillMaxWidth(0.92f))
             }
         }
 
         Spacer(modifier = Modifier.weight(1f))
 
-        Box(modifier = Modifier.padding(bottom = 60.dp)) {
+        Box(modifier = Modifier.padding(bottom = 80.dp)) {
             if (useFlowerLayout && apps.isNotEmpty()) {
                 FlowerLayout(apps, onAppClick, transparency, accentColor, iconSize, iconPackId)
             } else {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(3),
-                    modifier = Modifier.width(300.dp),
-                    horizontalArrangement = Arrangement.spacedBy(24.dp),
-                    verticalArrangement = Arrangement.spacedBy(24.dp),
+                    modifier = Modifier.width(310.dp),
+                    horizontalArrangement = Arrangement.spacedBy(26.dp),
+                    verticalArrangement = Arrangement.spacedBy(26.dp),
                     contentPadding = PaddingValues(16.dp)
                 ) {
                     items(apps) { app ->
@@ -214,8 +214,6 @@ fun MainHomePage(
                 }
             }
         }
-        
-        Spacer(modifier = Modifier.height(60.dp))
     }
 }
 
@@ -229,17 +227,17 @@ fun FlowerLayout(
     iconPackId: String?
 ) {
     Box(
-        modifier = Modifier.size(300.dp),
+        modifier = Modifier.size(310.dp),
         contentAlignment = Alignment.Center
     ) {
         if (apps.isNotEmpty()) {
-            AppIconSimple(apps[0], onAppClick, transparency, accentColor, iconSize * 1.3f, iconPackId)
+            AppIconSimple(apps[0], onAppClick, transparency, accentColor, iconSize * 1.35f, iconPackId)
         }
         
         val surroundingApps = apps.drop(1).take(6)
         surroundingApps.forEachIndexed { index, app ->
             val angle = (index * (360f / surroundingApps.size) - 90f) * (PI / 180f)
-            val radius = 100.dp
+            val radius = 105.dp
             
             Box(
                 modifier = Modifier.offset(
@@ -253,9 +251,11 @@ fun FlowerLayout(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppDrawerPage(
     categorizedApps: Map<AppCategory, List<AppInfo>>,
+    allApps: List<AppInfo>,
     onAppClick: (String) -> Unit,
     transparency: Float,
     accentColor: Color,
@@ -265,7 +265,7 @@ fun AppDrawerPage(
     showLabels: Boolean,
     iconPackId: String?
 ) {
-    var selectedCategory by remember { mutableStateOf(AppCategory.COMMUNICATION) }
+    var selectedCategory by remember { mutableStateOf<AppCategory?>(null) }
     var searchQuery by remember { mutableStateOf("") }
 
     Row(
@@ -274,87 +274,136 @@ fun AppDrawerPage(
             .statusBarsPadding()
             .navigationBarsPadding()
     ) {
+        // Sidebar: Improved Visual Clarity & Organization
         Column(
             modifier = Modifier
-                .width(84.dp)
+                .width(86.dp)
                 .fillMaxHeight()
-                .background(
-                    Brush.horizontalGradient(
-                        colors = listOf(Color.Black.copy(alpha = transparency + 0.3f), Color.Transparent)
-                    )
-                )
                 .padding(vertical = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // "All Apps" / "Recents" Icon
+            CategoryIconButton(
+                isSelected = selectedCategory == null,
+                icon = Icons.Default.Search,
+                onClick = { selectedCategory = null },
+                accentColor = Color.White
+            )
+
+            Divider(modifier = Modifier.width(40.dp).padding(vertical = 8.dp), color = Color.White.copy(alpha = 0.1f))
+
             AppCategory.values().forEach { category ->
-                val isSelected = selectedCategory == category
-                val scale by animateFloatAsState(if (isSelected) 1.25f else 1f)
-                
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .graphicsLayer { 
-                            scaleX = scale
-                            scaleY = scale
-                        }
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(if (isSelected) accentColor.copy(alpha = 0.3f) else Color.Transparent)
-                        .clickable { selectedCategory = category },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = category.icon,
-                        contentDescription = category.title,
-                        tint = if (isSelected) accentColor else Color.White.copy(alpha = 0.5f),
-                        modifier = Modifier.size(26.dp)
-                    )
-                }
+                CategoryIconButton(
+                    isSelected = selectedCategory == category,
+                    icon = category.icon,
+                    onClick = { selectedCategory = category },
+                    accentColor = accentColor
+                )
             }
         }
 
+        // Main Drawer Content
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 16.dp)
+                .padding(end = 16.dp)
         ) {
-            TextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
+            // Search Bar: Cleaner & iOS-inspired
+            GlassBox(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp, bottom = 16.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-                placeholder = { Text("Search apps...", color = Color.White.copy(alpha = 0.5f)) },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.White.copy(alpha = 0.5f)) },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.White.copy(alpha = 0.1f),
-                    unfocusedContainerColor = Color.White.copy(alpha = 0.1f),
-                    disabledContainerColor = Color.White.copy(alpha = 0.1f),
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White
-                ),
-                singleLine = true
-            )
-
-            val appsInCategory = categorizedApps[selectedCategory] ?: emptyList()
-            val filteredApps = if (searchQuery.isEmpty()) appsInCategory else {
-                appsInCategory.filter { it.label.contains(searchQuery, ignoreCase = true) }
+                    .padding(top = 8.dp, bottom = 16.dp),
+                shape = RoundedCornerShape(14.dp),
+                transparency = 0.12f
+            ) {
+                TextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("Search Apps", color = Color.White.copy(alpha = 0.35f), style = MaterialTheme.typography.bodyMedium) },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.White.copy(alpha = 0.4f), modifier = Modifier.size(20.dp)) },
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        cursorColor = accentColor
+                    ),
+                    singleLine = true
+                )
             }
 
+            // Category Header / Content Title
+            Text(
+                text = (selectedCategory?.title ?: if(searchQuery.isEmpty()) "Recent & Recommended" else "Search Results").uppercase(),
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.White.copy(alpha = 0.45f),
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 1.5.sp,
+                modifier = Modifier.padding(bottom = 16.dp, start = 4.dp)
+            )
+
+            val displayApps = remember(selectedCategory, searchQuery, categorizedApps, allApps) {
+                when {
+                    searchQuery.isNotEmpty() -> allApps.filter { it.label.contains(searchQuery, ignoreCase = true) }
+                    selectedCategory != null -> categorizedApps[selectedCategory] ?: emptyList()
+                    else -> allApps // In a real app, this would be sorted by usage
+                }
+            }
+
+            // Grid: Balanced aesthetics & smooth navigation
             LazyVerticalGrid(
                 columns = GridCells.Fixed(gridColumns),
                 modifier = Modifier.fillMaxSize(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp),
-                contentPadding = PaddingValues(bottom = 120.dp)
+                contentPadding = PaddingValues(bottom = 120.dp, top = 4.dp)
             ) {
-                items(filteredApps) { app ->
+                items(displayApps) { app ->
                     AppItemDrawer(app, onAppClick, transparency, iconSize, labelSize, showLabels, accentColor, iconPackId)
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun CategoryIconButton(
+    isSelected: Boolean,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    onClick: () -> Unit,
+    accentColor: Color
+) {
+    val scale by animateFloatAsState(if (isSelected) 1.25f else 1f)
+    
+    Box(
+        modifier = Modifier
+            .size(52.dp)
+            .graphicsLayer { scaleX = scale; scaleY = scale }
+            .clip(RoundedCornerShape(16.dp))
+            .background(if (isSelected) Color.White.copy(alpha = 0.15f) else Color.Transparent)
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = if (isSelected) accentColor else Color.White.copy(alpha = 0.4f),
+            modifier = Modifier.size(24.dp)
+        )
+        if (isSelected) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .width(4.dp)
+                    .height(20.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(accentColor)
+            )
         }
     }
 }
@@ -372,29 +421,21 @@ fun AppIconSimple(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.clickable { onClick(app.packageName) }
     ) {
-        Box(
-            modifier = Modifier
-                .size(size)
-                .clip(CircleShape)
-                .background(Color.White.copy(alpha = transparency))
-                .graphicsLayer { 
-                    shadowElevation = 4f
-                    shape = CircleShape
-                    clip = true
-                },
-            contentAlignment = Alignment.Center
+        GlassBox(
+            modifier = Modifier.size(size),
+            shape = CircleShape,
+            transparency = transparency,
+            borderWidth = 1.2.dp
         ) {
             val isNeon = iconPackId == "1"
-            
             Image(
                 painter = rememberAsyncImagePainter(app.icon),
                 contentDescription = null,
-                modifier = Modifier.size(size * 0.7f),
-                colorFilter = if (isNeon) ColorFilter.tint(accentColor.copy(alpha = 0.8f)) else null
+                modifier = Modifier.size(size * 0.68f),
+                colorFilter = if (isNeon) ColorFilter.tint(accentColor.copy(alpha = 0.95f)) else null
             )
-            
             if (isNeon) {
-                Box(modifier = Modifier.fillMaxSize().blur(12.dp).alpha(0.2f).background(accentColor))
+                Box(modifier = Modifier.fillMaxSize().blur(18.dp).alpha(0.25f).background(accentColor))
             }
         }
     }
@@ -413,36 +454,37 @@ fun AppItemDrawer(
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.clickable { onClick(app.packageName) }.width(IntrinsicSize.Min)
+        modifier = Modifier
+            .width(IntrinsicSize.Min)
+            .clickable { onClick(app.packageName) }
     ) {
-        Box(
-            modifier = Modifier
-                .size(iconSize)
-                .clip(RoundedCornerShape(16.dp))
-                .background(Color.White.copy(alpha = transparency / 1.5f)),
-            contentAlignment = Alignment.Center
+        GlassBox(
+            modifier = Modifier.size(iconSize),
+            shape = RoundedCornerShape(iconSize / 3.8f),
+            transparency = transparency / 1.6f,
+            borderWidth = 0.6.dp
         ) {
             val isNeon = iconPackId == "1"
-            
             Image(
                 painter = rememberAsyncImagePainter(app.icon),
                 contentDescription = null, 
-                modifier = Modifier.size(iconSize * 0.65f),
+                modifier = Modifier.size(iconSize * 0.62f),
                 colorFilter = if (isNeon) ColorFilter.tint(accentColor) else null
             )
         }
         
         if (showLabels) {
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = app.label,
                 style = MaterialTheme.typography.labelSmall,
-                color = Color.White,
+                color = Color.White.copy(alpha = 0.9f),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center,
                 fontSize = labelSize.sp,
                 fontWeight = FontWeight.Medium,
+                lineHeight = (labelSize + 2).sp,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 2.dp)
             )
         }
