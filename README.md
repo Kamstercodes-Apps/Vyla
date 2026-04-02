@@ -2,8 +2,6 @@
 
 VYLA is a modern, high-performance Android launcher built with **Jetpack Compose**. It blends minimalist aesthetics with powerful customization, inspired by the intuitive design of Smart Launcher 6.
 
-![Launcher Preview](https://via.placeholder.com/800x400.png?text=VYLA+Launcher+Preview)
-
 ## ✨ Features
 
 ### 🌸 Smart Home Screen
@@ -33,7 +31,7 @@ VYLA is a modern, high-performance Android launcher built with **Jetpack Compose
 ### Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-repo/vyla-launcher.git
+   git clone https://github.com/Kamstercodes/Vyla.git
    ```
 2. Open the project in **Android Studio**.
 3. Build and run the `:app` module on your device.
@@ -48,15 +46,12 @@ VYLA is a modern, high-performance Android launcher built with **Jetpack Compose
 - **Asynchrony**: [Kotlin Coroutines](https://kotlinlang.org/docs/coroutines-overview.html) & [Flow](https://kotlinlang.org/docs/flow.html)
 
 ## 📸 Screenshots
-| Home (Grid) | Home (Flower) | App Drawer | Settings |
-| :---: | :---: | :---: | :---: |
-| ![Home Grid](https://via.placeholder.com/200x400) | ![Home Flower](https://via.placeholder.com/200x400) | ![App Drawer](https://via.placeholder.com/200x400) | ![Settings](https://via.placeholder.com/200x400) |
+| Home (Grid) | Home (Flower) | Settings |
+| :---: | :---: | :---: |
+| <img src="Screenshot-Grid.png" height="250"> | <img src="Screenshot-Flower.png" height="250"> | <img src="Screenshot-Settings.png" height="250"> |
 
 ## 📜 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙌 Contributing
-Contributions are welcome! Please feel free to submit a Pull Request.
+This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENSE) file for details.
 
 ---
 Developed by **KamsterCodes**
